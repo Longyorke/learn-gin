@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -15,23 +16,25 @@ func main() {
 			"name": "LongYorke",
 		})
 	})
-	Router.POST("/user", func(ctx *gin.Context) {
-		ctx.JSON(200, "POST")
+	// 带参数的url
+	Router.GET("/user/:id", func(ctx *gin.Context) {
+		params := ctx.Param("id")
+		ctx.JSON(200, gin.H{
+			"get_user_id": params,
+		})
 	})
-	Router.DELETE("/user", func(ctx *gin.Context) {
-		ctx.JSON(200, "DELETE")
+	// 模糊匹配
+	Router.GET("/user/match/*path", func(ctx *gin.Context) {
+		params := ctx.Param("path")
+		ctx.JSON(200, gin.H{
+			"your_path": params,
+		})
 	})
-	Router.PUT("/user", func(ctx *gin.Context) {
-		ctx.JSON(200, "PUT")
-	})
-	Router.PATCH("/user", func(ctx *gin.Context) {
-		ctx.JSON(200, "PATCH")
-	})
-	Router.GET("/user", func(ctx *gin.Context) {
-		ctx.JSON(200, "GET")
-	})
-	Router.Any("/any", func(ctx *gin.Context) {
-		ctx.JSON(200, map[string]any{"method": "Any"})
+	// 混合使用
+	Router.GET("/user/mix/:name/*action", func(ctx *gin.Context) {
+		name := ctx.Param("name")
+		action := ctx.Param("action")
+		ctx.String(http.StatusOK, "%s is %s", name, action)
 	})
 
 	err := Router.Run(":8082")
