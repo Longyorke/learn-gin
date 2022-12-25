@@ -11,17 +11,16 @@ type User struct {
 	Name    string   `form:"name"`
 	Address []string `form:"address" binding:"required"`
 	//tag加上binding:"required"后.BindQuery()返回400，ShouldBindQuery()返回200
+	AddressMap map[string]string `form:"addressMap"`
 }
 
 func main() {
 	Router := gin.Default()
-	// http://localhost:8082/user/save?address=Beijing&address=Shanghai
+	// http://localhost:8082/user/save?addressMap[college]=Beijing&addressMap[company]=Shanghai
 	Router.GET("/user/save", func(ctx *gin.Context) {
 		var user User
-		err := ctx.ShouldBindQuery(&user) // 绑定类型方式
-		if err != nil {
-			log.Println(err)
-		}
+		addressMap, _ := ctx.GetQueryMap("addressMap") // 判断方式
+		user.AddressMap = addressMap
 		ctx.JSON(http.StatusOK, user)
 	})
 	err := Router.Run(":8082")
