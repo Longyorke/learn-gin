@@ -16,7 +16,7 @@ func main() {
 			"name": "LongYorke",
 		})
 	})
-	// 带参数的url
+	// 路径参数
 	Router.GET("/user/:id", func(ctx *gin.Context) {
 		params := ctx.Param("id")
 		ctx.JSON(200, gin.H{
