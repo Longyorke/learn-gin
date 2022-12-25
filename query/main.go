@@ -6,21 +6,23 @@ import (
 	"net/http"
 )
 
+type User struct {
+	Id      int64  `form:"id"` // 注意是反引号,内部值为字符串
+	Name    string `form:"name"`
+	Address string `from:"address" binding:"required"`
+	//tag加上binding:"required"后.BindQuery()会返回400
+}
+
 func main() {
 	Router := gin.Default()
 	// http://localhost:8082/user/save?id=123456&name=LongYorke
 	Router.GET("/user/save", func(ctx *gin.Context) {
-		id := ctx.Query("id")
-		name := ctx.Query("name")
-		address := ctx.DefaultQuery("address", "Beijing") // 默认方式
-		mobile, mobileOk := ctx.GetQuery("mobile")        // 判断方式
-		ctx.JSON(http.StatusOK, gin.H{
-			"id":        id,
-			"name":      name,
-			"address":   address,
-			"mobile":    mobile,
-			"mobile_ok": mobileOk,
-		})
+		var user User
+		err := ctx.ShouldBindQuery(&user)
+		if err != nil {
+			log.Print(err)
+		}
+		ctx.JSON(http.StatusOK, user)
 	})
 	err := Router.Run(":8082")
 	if err != nil {
