@@ -60,15 +60,46 @@ func main() {
 	//})
 
 	// 路径参数
-	Router.POST("/find/:id/:age/:name", func(context *gin.Context) {
-		var p Person
-		if err := context.ShouldBindUri(&p); err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{
+	//Router.POST("/find/:id/:age/:name", func(context *gin.Context) {
+	//	var p Person
+	//	if err := context.ShouldBindUri(&p); err != nil {
+	//		context.JSON(http.StatusBadRequest, gin.H{
+	//			"msg": err.Error(),
+	//		})
+	//		return
+	//	}
+	//	context.JSON(http.StatusOK, p)
+	//})
+
+	// 文件参数
+	Router.POST("/user/save", func(ctx *gin.Context) {
+		form, err := ctx.MultipartForm()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
 				"msg": err.Error(),
 			})
 			return
 		}
-		context.JSON(http.StatusOK, p)
+		//Value map[string][]string
+		//File  map[string][]*FileHeader
+		value := form.Value //表单中的除文件外所有数据
+		files := form.File  //表单中的文件数据
+		//遍历参数名称对应的每一个文件数组（同一个参数名称下可有多个文件）
+		for _, fileArray := range files {
+			//遍历文件数组中每一个FileHeader元素
+			//type FileHeader struct {
+			//	Filename string
+			//	Header   textproto.MIMEHeader
+			//	Size     int64
+			//
+			//	content []byte
+			//	tmpfile string
+			//}
+			for _, v := range fileArray {
+				ctx.SaveUploadedFile(v, "./"+v.Filename) //文件保存到当前目录
+			}
+		}
+		ctx.JSON(http.StatusOK, value)
 	})
 
 	err := Router.Run(":8082")
